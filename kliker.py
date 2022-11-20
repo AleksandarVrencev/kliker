@@ -19,7 +19,7 @@ def main():
     root = tk.Tk()
     root.title('Kliker')
     root.geometry('500x500')
-    root.resizable(True, True)
+    root.resizable(False, False)
     hotkey = tk.StringVar(root)
     # make a function that will click on all positions in the list
     def start():
