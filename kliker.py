@@ -5,6 +5,7 @@ import tkinter as tk
 from pynput import keyboard
 from tkinter import *
 from tkinter import messagebox, filedialog, simpledialog
+import keyboard
 # row counter
 i = 1
 # make a list of x and y coordinates and click types
@@ -14,6 +15,7 @@ key_presses = []
 # bool to stop recording click binds as L,R,D to be able to record key presses
 bool_click_recording = True
 entry_var = ""
+list_of_moves = []
 def main():
     # make a tkinter window with a button 
     root = tk.Tk()
@@ -30,6 +32,8 @@ def main():
             root.iconify()
             for i in lista:
                 if i[2] == 'key' or i[2] == 'ctrl' or i[2] == 'alt' or i[2] == 'shift' or i[2] == 'win':
+                    binder(i[0], i[1], i[2], i[3])
+                elif i[2] == 'record':
                     binder(i[0], i[1], i[2], i[3])
                 else:
                     binder(i[0], i[1], i[2])
@@ -51,11 +55,22 @@ def main():
     
     # make a function that will record keyboard input
     keys_list = ['ctrl', 'alt', 'shift', 'win']
+    
     def record_keyboard_input():
-        global bool_click_recording, i, entry_var
-        if entry_var == "":
+        global bool_click_recording, i, entry_var, list_of_moves
+        if entry_var == "a":
             messagebox.showinfo('Kliker', 'Enter text!')
         else:
+            # every item in the list except the last one
+            for r in list_of_moves:
+                for c in r[:-1:2]:                    
+                    listbox.insert(tk.END, str(i) + "." + str(pyautogui.position().x) + " " + str(pyautogui.position().y) + " " + str(c).split("(")[1].split(")")[0])
+                    i += 1
+                    lista.append([pyautogui.position().x, pyautogui.position().y, 'key' , str(c)[14:15]])
+                    bool_click_recording = True
+                    entry_var = ""
+                    root.focus()
+            list_of_moves.clear()
             if hotkey.get() in keys_list:
                 listbox.insert(tk.END, str(i) + "." + str(pyautogui.position().x) + " " + str(pyautogui.position().y) + " " + hotkey.get() + ' ' + entry_var)
                 i += 1
@@ -228,6 +243,21 @@ def main():
         \n\nTo edit an item, double click on it.\n\nTo remove an item, press the remove button.\
         \n\nTo clear the list, press the clear button.\n\nTo start the program, press the start button.\
         \n\nTo exit the program, press the exit button.")
+    
+    def record():
+        global list_of_moves
+        # Record events until 'esc' is pressed.
+        messagebox.showinfo("Recording", "Press 'esc' to stop recording!")
+        # change focus from
+        recorded = keyboard.record(until='esc')
+        print(recorded)
+        list_of_moves.append(recorded)
+        play()
+
+    def play():
+        for i in list_of_moves:
+            keyboard.play(i, speed_factor=1)
+
     # add file menu to the menu bar with commands
     file_menu = Menu(root, tearoff=0)
     root.config(menu=file_menu)
@@ -244,6 +274,7 @@ def main():
     file_menu.add_command(label="Add", command=record_keyboard_input)
     file_menu.add_command(label="Clear", command=clear)
     file_menu.add_command(label="Remove", command=delete)
+    file_menu.add_command(label="Record", command=record)
     file_menu.add_command(label="Help", command=help)
     # make a listbox
     listbox = tk.Listbox(root, width=59, height=20)

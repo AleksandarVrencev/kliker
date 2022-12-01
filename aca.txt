@@ -1,6 +1,0 @@
-911,351,right
-909,358,left
-1132,397,double
-885,432,double
-889,432,double
-844,438,left
